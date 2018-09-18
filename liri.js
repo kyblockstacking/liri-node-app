@@ -1,11 +1,12 @@
 require("dotenv").config();
-var Spotify = require("node-spotify-api")
+var Spotify = require("node-spotify-api");
 var moment = require("moment");
 var request = require("request");
 var api = require("./keys");
 var spotify = new Spotify(api.spotify);
 var songName = process.argv.slice(3).join(" ");
 var search = process.argv.slice(3).join(" ");
+// Default input to "Mr. Nobody"
 if (search === "") {
     var search = "Mr. Nobody"
 };
@@ -20,17 +21,19 @@ function spotifyMe(userInput) {
     spotify.search({ type: 'track', query: userInput, limit: 1 }, function (error, data) {
         if (error) {
             return console.log(error);
-        }
-        var artist = data.tracks.items[0].artists[0].name
-        var previewLink = data.tracks.items[0].preview_url
-        var album = data.tracks.items[0].album.name
+        };
+        var artist = data.tracks.items[0].artists[0].name;
+        var previewLink = data.tracks.items[0].preview_url;
+        var album = data.tracks.items[0].album.name;
         // Display to user
         console.log("Song name: " + userInput);
         console.log("Artist: " + artist);
-        console.log("Preview link: " + previewLink)
-        console.log("Album: " + album)
-    })
-}
+        console.log("Preview link: " + previewLink);
+        console.log("Album: " + album);
+    });
+};
+
+// Switch case to check and execute flow of input of argv[2]
 switch (process.argv[2]) {
     case "concert-this":
         // User input
@@ -39,8 +42,7 @@ switch (process.argv[2]) {
         request('https://rest.bandsintown.com/artists/' + artist + '/events?app_id=codingbootcamp', function (error, response, data) {
             if (error) {
                 return console.log(error);
-            }
-
+            };
             var data = JSON.parse(data);
             var venueName = data[0].venue.name;
             var venueLocation = data[0].venue.city + ", " + data[0].venue.region;
@@ -60,11 +62,6 @@ switch (process.argv[2]) {
         break;
 
     case "movie-this":
-        // User input
-        // var search = process.argv.slice(3).join(" ");
-        // if (search === "") {
-        //     var search = "Mr. Nobody"
-        // };
         // Query URL for OMDB
         request("http://www.omdbapi.com/?apikey=trilogy&t=" + search, function (error, response, data) {
             if (error) {
@@ -91,14 +88,14 @@ switch (process.argv[2]) {
         });
         break;
     case "do-what-it-says":
-        var fs = require("fs")
+        var fs = require("fs");
         fs.readFile("./random.txt", "utf8", function (error, data) {
             if (error) {
                 throw error;
-            }
+            };
             var spotThis = data.slice(0, 17);
             var songName2 = data.slice(19, data.length - 1);
             spotifyMe(songName2);
-        })
+        });
         break;
 };
