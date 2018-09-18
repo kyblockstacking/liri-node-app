@@ -4,7 +4,33 @@ var moment = require("moment");
 var request = require("request");
 var api = require("./keys");
 var spotify = new Spotify(api.spotify);
+var songName = process.argv.slice(3).join(" ");
+var search = process.argv.slice(3).join(" ");
+if (search === "") {
+    var search = "Mr. Nobody"
+};
 
+function spotifyMe(userInput) {
+
+    var spotify = new Spotify({
+        id: '018a592b2a7e4e55a133d871bd8a6fda',
+        secret: '8cb7143c95a944fb806a5779c3d81a4a'
+    });
+    // Query URL for spotify
+    spotify.search({ type: 'track', query: userInput, limit: 1 }, function (error, data) {
+        if (error) {
+            return console.log(error);
+        }
+        var artist = data.tracks.items[0].artists[0].name
+        var previewLink = data.tracks.items[0].preview_url
+        var album = data.tracks.items[0].album.name
+        // Display to user
+        console.log("Song name: " + userInput);
+        console.log("Artist: " + artist);
+        console.log("Preview link: " + previewLink)
+        console.log("Album: " + album)
+    })
+}
 switch (process.argv[2]) {
     case "concert-this":
         // User input
@@ -28,41 +54,22 @@ switch (process.argv[2]) {
             console.log("Venue location: " + venueLocation);
             console.log("Date of event: " + month + "/" + day + "/" + year);
         });
-
+        break;
     case "spotify-this-song":
-        // User input
-        var songName = process.argv.slice(3);
-
-        var spotify = new Spotify({
-            id: '018a592b2a7e4e55a133d871bd8a6fda',
-            secret: '8cb7143c95a944fb806a5779c3d81a4a'
-        });
-        // Query URL for spotify
-        spotify.search({ type: 'track', query: songName, limit: 1 }, function (error, data) {
-            if (error) {
-                return console.log(error);
-            }
-            var artist = data.tracks.items[0].artists[0].name
-            var previewLink = data.tracks.items[0].preview_url
-            var album = data.tracks.items[0].album.name
-            // Display to user
-            console.log("Song name: " + songName);
-            console.log("Artist: " + artist);
-            console.log("Preview link: " + previewLink)
-            console.log("Album: " + album)
-        });
+        spotifyMe(songName);
+        break;
 
     case "movie-this":
         // User input
-        var search = process.argv.slice(3);
-        if (search === "") {
-            var search = "Mr. Nobody"
-        };
+        // var search = process.argv.slice(3).join(" ");
+        // if (search === "") {
+        //     var search = "Mr. Nobody"
+        // };
         // Query URL for OMDB
         request("http://www.omdbapi.com/?apikey=trilogy&t=" + search, function (error, response, data) {
-            // if (error) {
-            //     return console.log(error);
-            // }
+            if (error) {
+                return console.log(error);
+            }
             var data = JSON.parse(data);
             var title = data.Title;
             var year = data.Year;
@@ -82,13 +89,16 @@ switch (process.argv[2]) {
             console.log("Plot: " + plot);
             console.log("Actors: " + actors);
         });
+        break;
     case "do-what-it-says":
         var fs = require("fs")
-        fs.readFile("./random.txt", "utf8", function(error, data) {
-            if(error) {
+        fs.readFile("./random.txt", "utf8", function (error, data) {
+            if (error) {
                 throw error;
             }
             var spotThis = data.slice(0, 17);
-            var songName2 = data.slice(19, data.length -1);
+            var songName2 = data.slice(19, data.length - 1);
+            spotifyMe(songName2);
         })
-}
+        break;
+};
